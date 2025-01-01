@@ -1,0 +1,2 @@
+llama-index-llms-mistralai
+PyPDF2
