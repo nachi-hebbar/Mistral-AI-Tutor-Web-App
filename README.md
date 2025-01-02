@@ -1,5 +1,5 @@
 
-📚 Mistral-Powered AI Study Buddy
+
 An AI-powered personal tutor that generates tailored summaries, quizzes, coding challenges, and answers questions based on uploaded documents. Built using the Mistral API for advanced NLP capabilities.
 ![image](https://github.com/user-attachments/assets/cef0543d-95d4-4924-aec8-5b57f4c6f92f)
 
