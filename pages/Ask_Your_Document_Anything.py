@@ -39,9 +39,11 @@ def rag_pdf(documents: list, question: str) -> str:
 
 # Function to ask Mistral
 def ask_mistral(messages: list, documents: list):
+
+    concise_instruction = "Please provide a concise response to the following question based on the context provided:\n\n"
     if documents:
         retrieved_text = rag_pdf(documents, messages[-1]["content"])
-        messages[-1]["content"] = retrieved_text + "\n\n" + messages[-1]["content"]
+        messages[-1]["content"] = retrieved_text + "\n\n" + concise_instruction + messages[-1]["content"]
 
     response = cli.chat.complete(
         model="pixtral-12b-2409",

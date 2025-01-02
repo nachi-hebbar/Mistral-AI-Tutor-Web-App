@@ -204,7 +204,8 @@ def generate_coding_questions(content, num_questions=5, difficulty="Medium", inc
 
         # Call Codestral Instruct endpoint
         response = client.chat.complete(
-            model="pixtral-12b-2409",  # Update to use Codestral Mamba
+            model="pixtral-12b-2409",
+            #model="open-codestral-mamba",#Disabling codestral for incorrect output format for now
             messages=messages,
             temperature=0.4,
             response_format={"type": "json_object"},
