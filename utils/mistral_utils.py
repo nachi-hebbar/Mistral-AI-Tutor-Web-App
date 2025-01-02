@@ -25,7 +25,7 @@ def generate_summary(content):
                 "and output it in JSON format with the following keys:\n"
                 "- `summary`: A concise summary of the document (150-200 words).\n"
                 "- `key_skills`: A list of key skills required to learn or understand the content.\n"
-                "- `difficulty`: The estimated difficulty level (Beginner, Intermediate, or Advanced) for a STEM college student.\n"
+                "- `difficulty`: The estimated difficulty level (Easy, Medium, or Hard) for a STEM college student.\n"
                 "- `estimated_time`: The estimated time (in minutes) required for a STEM college student to read and thoroughly comprehend the document.\n\n"
                 "#### Few-shot Examples:\n"
                 "Example 1:\n"
@@ -163,7 +163,7 @@ def generate_coding_questions(content, num_questions=5, difficulty="Medium", inc
                 "content": (
                     f"You are an expert programming instructor creating coding challenges for students."
                     f" Based on the provided content, create **{num_questions} coding questions** for students with a difficulty level of '{difficulty}'."
-                    " Each question should focus on programming concepts, debugging, or completing code. Only coding related, nothing else."
+                    " Each question should focus on programming concepts, debugging, or completing code. Only coding related, nothing else and pertaining to the document provided."
                     "\n\n#### Instructions:\n"
                     "- Ensure the questions are relevant to the provided content. They can be programming tasks required to implement the content or show understanding of the content\n"
                     "- For each question, include a short problem description and the code snippet if applicable.\n"
@@ -175,7 +175,7 @@ def generate_coding_questions(content, num_questions=5, difficulty="Medium", inc
                     "- **TaskType**: The type of coding activity ('Understanding', 'Debugging', 'Completion').\n"
                     "- **CodeSnippet**: The relevant code snippet, if applicable.\n"
                     "- **Answer**: The correct answer or explanation.\n"
-                    "\n#### Few-shot Example:\n"
+                    "\n#### Few-shot Examples:\n"
                     "[\n"
                     "  {\n"
                     "    \"Question\": \"What does this Python function do?\",\n"
@@ -204,9 +204,9 @@ def generate_coding_questions(content, num_questions=5, difficulty="Medium", inc
 
         # Call Codestral Instruct endpoint
         response = client.chat.complete(
-            model="pixtral-12b-2409",  # Updated to use Codestral Mamba
+            model="pixtral-12b-2409",  # Update to use Codestral Mamba
             messages=messages,
-            temperature=0.7,
+            temperature=0.4,
             response_format={"type": "json_object"},
         )
 
