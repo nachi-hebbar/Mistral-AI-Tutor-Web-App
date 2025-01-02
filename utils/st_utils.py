@@ -6,31 +6,29 @@ from utils.mistral_utils import generate_coding_questions
 import json
 
 
-def display_interactive_quiz_with_form(quiz_data,id):
+def display_interactive_quiz_with_form(quiz_data, doc_name):
     """
     Display the quiz interactively using a Streamlit form. The form collects all answers and submits them together.
 
     Args:
         quiz_data (list): List of dictionaries with 'Question', 'Options', and 'Answer' keys.
+        doc_name (str): The name of the document for unique form keys.
     """
-    #st.title("Interactive Quiz")
-    form_key="quiz_form_"+str(id)
+    form_key = f"quiz_form_{doc_name.replace(' ', '_')}"  # Ensure unique form key
+    selected_answers = {}
 
     # Check if the form is submitted
     with st.form(form_key):
         st.write("Answer the questions and click 'Submit' to check your score.")
 
-        # Dictionary to hold user-selected answers
-        selected_answers = {}
-
         # Display each question with radio buttons
         for idx, question_data in enumerate(quiz_data):
-            idx=idx+id*5
             st.subheader(f"Question {idx + 1}: {question_data['Question']}")
             selected_answers[idx] = st.radio(
                 f"Choose an answer for Question {idx + 1}",
                 options=question_data["Options"],
-                key=f"q_{idx}",
+                key=f"{form_key}_q_{idx}",
+                index=None
             )
 
         # Submit button to check the score
@@ -43,16 +41,19 @@ def display_interactive_quiz_with_form(quiz_data,id):
 
         # Evaluate answers
         for idx, question_data in enumerate(quiz_data):
-            idx=idx+id*5
-            user_answer = selected_answers[idx]
-            if user_answer == question_data["Answer"]:
+            user_answer = selected_answers.get(idx)
+            correct_answer = question_data["Answer"]
+
+            if user_answer == correct_answer:
                 correct_count += 1
                 st.success(f"Question {idx + 1}: Correct!")
             else:
-                st.error(f"Question {idx + 1}: Wrong! Correct answer is: {question_data['Answer']}")
+                st.error(f"Question {idx + 1}: Wrong!")
+                st.markdown(f"**Correct Answer:** {correct_answer}")
 
         # Display final score
-        st.write(f"Your Score: {correct_count}/{total_questions}")
+        st.markdown(f"### Your Score: {correct_count}/{total_questions}")
+
 
 
 @st.cache_data
@@ -89,88 +90,6 @@ def parse_quiz_response(raw_response):
 
 
 
-def display_home_page():
-    # Page title
-    st.title("📚 Your Mistral-Powered AI Study Buddy")
-    st.markdown("""
-        <style>
-            .centered-box {
-                background-color: #f9f9f9;
-                border-radius: 10px;
-                padding: 20px;
-                text-align: center;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                margin: 20px auto;
-                max-width: 800px;
-            }
-            .btn-container {
-                margin-top: 30px;
-                display: flex;
-                justify-content: space-around;
-                flex-wrap: wrap;
-            }
-            .btn {
-                color: white; /* White text for contrast */
-                padding: 15px 30px; /* Larger padding for better clickability */
-                border-radius: 25px; /* Rounded corners for a modern look */
-                font-size: 16px; /* Increase font size for readability */
-                font-weight: bold;
-                text-decoration: none;
-                text-align: center;
-                transition: all 0.3s ease; /* Smooth hover effect */
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-                margin: 10px; /* Spacing between buttons */
-                border: none; /* Remove border */
-            }
-            .btn:hover {
-                background-color: #16a085; /* Slightly darker teal on hover */
-                box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Deeper shadow on hover */
-                transform: translateY(-2px); /* Hover "lift" effect */
-            }
-            .upload-box {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # Introductory section
-    st.markdown("""
-        <div class="centered-box">
-            <h2>Step 1: Upload Your Study Material</h2>
-            <p>Upload one or more PDFs to generate instant summaries, study plans, and quizzes tailored just for you!</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-    # File uploader
-    uploaded_files = st.file_uploader("Upload one or more PDFs", type=["pdf"], accept_multiple_files=True)
-
-    if uploaded_files:
-        # Spinning loader for processing
-        with st.spinner("Hang tight! We're summarizing your documents..."):
-
-            documents = extract_text_from_pdfs(uploaded_files)
-
-            # Generate summaries
-            summaries = {}
-            for doc in documents:
-                summaries[doc["name"]] = generate_summary(doc["content"])
-
-            # Save summaries in session state
-            st.session_state["summaries"] = summaries
-            st.session_state["documents"] = documents
-
-        # Display summaries using columns
-        st.markdown("<h3 style='text-align: center;'>Document Summaries</h3>", unsafe_allow_html=True)
-        cols = st.columns(len(summaries))  # Create as many columns as there are summaries
-        for i, (name, summary) in enumerate(summaries.items()):
-            with cols[i]:  # Place each summary in its respective column
-                st.markdown(f"Document Name: **{name}**")
-                display_enhanced_summary(json.loads(summary))
-
-        # Success message
-        st.success("Documents processed successfully! Use the sidebar to explore quiz generation, coding questions, and flashcards.")
-
 
 
 def display_enhanced_summary(summary_data):
@@ -204,9 +123,32 @@ def display_enhanced_summary(summary_data):
             color: #27ae60;
             margin-right: 8px;
         }
-        .difficulty, .time {
+        .difficulty-level {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .difficulty-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
             font-weight: bold;
-            color: #e67e22;
+            border-radius: 5px;
+        }
+        .difficulty-item.easy {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .difficulty-item.medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .difficulty-item.hard {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .highlight {
+            border: 2px solid #000;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -231,11 +173,16 @@ def display_enhanced_summary(summary_data):
     </div>
     """, unsafe_allow_html=True)
 
-    # Render Difficulty Level
+    # Render Difficulty Level Section
+    difficulty = summary_data.get('difficulty', 'Medium').lower()  # Fallback to 'Medium'
     st.markdown(f"""
     <div class="summary-card">
         <h3>Difficulty Level</h3>
-        <p class="difficulty">{summary_data['difficulty']}</p>
+        <div class="difficulty-level">
+            <div class="difficulty-item easy {'highlight' if difficulty == 'easy' else ''}">Easy</div>
+            <div class="difficulty-item medium {'highlight' if difficulty == 'medium' else ''}">Medium</div>
+            <div class="difficulty-item hard {'highlight' if difficulty == 'hard' else ''}">Hard</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -250,50 +197,8 @@ def display_enhanced_summary(summary_data):
 
 
 
-def display_code_generation_page():
-    """
-    Displays the Code Generation page with options to customize coding questions and view the results.
-    """
-    st.title("🧑‍💻 Code Generation")
 
-    st.markdown("""
-    Generate coding challenges based on your study material. Customize the type of questions, difficulty level, and number of tasks to create tailored coding exercises.
-    """)
 
-    # Customization options
-    st.markdown("### Customize Your Coding Questions")
-    with st.form("code_generation_form"):
-        num_questions = st.slider("Number of Questions", 1, 10, 5)
-        difficulty = st.selectbox("Select Difficulty Level", ["Easy", "Medium", "Hard"])
-        include_explanations = st.checkbox("Include Explanations for Answers", value=True)
-
-        # Submit button
-        submit_button = st.form_submit_button("Generate Coding Questions")
-
-    # Check if session state has study material
-    if "documents" not in st.session_state:
-        st.warning("Please upload and process documents first on the 'Home' page.")
-    else:
-        if submit_button:
-            documents = st.session_state["documents"]
-
-            st.markdown("### Generated Coding Questions")
-            for doc in documents:
-                st.markdown(f"#### Coding Questions for: {doc['name']}")
-
-                # Generate questions using the utility function
-                raw_response = generate_coding_questions(
-                    content=doc["content"],
-                    num_questions=num_questions,
-                    difficulty=difficulty,
-                    include_explanations=include_explanations
-                )
-                print("The model gave this: ",raw_response)
-
-                # Parse and display the generated questions
-                parsed_questions = json.loads(raw_response)
-                for question in parsed_questions:
-                    display_coding_question_with_answer(question)
 
 def display_coding_question_with_answer(question_data, show_explanation=True):
     """
