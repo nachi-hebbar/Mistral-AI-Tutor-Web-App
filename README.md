@@ -31,10 +31,12 @@ Languages: Python
   MISTRAL_API_KEY = "your-api-key"
 4. Run the app using: streamlit run Home.py
    
-📄 Usage
+📄 Usage:
+
 Upload your study materials (PDFs).
 Explore generated summaries, quizzes, coding challenges, and Q&A.
 Customize difficulty levels and other settings for tailored experiences.
 
-🤝 Contributing
+🤝 Contributing:
+
 Feel free to submit pull requests or issues.
