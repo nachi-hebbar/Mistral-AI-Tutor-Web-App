@@ -5,6 +5,7 @@ import faiss
 from mistralai import Mistral
 
 # Initialize the Mistral client
+
 api_key = st.secrets["MISTRAL_API_KEY"]  # Use Streamlit secrets for API key management
 cli = Mistral(api_key=api_key)
 
